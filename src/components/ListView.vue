@@ -1,5 +1,8 @@
 <template>
   <div class="hello">
+    <button @click="LogState">Log State</button>
+    <button @click="AddRandomTask">Add random task</button>
+
     <!-- Could this all be in its own component? -->
     <modal
       :title="'Create Task'"
@@ -37,34 +40,38 @@
     <!-- Make Separate Component -->
     <div style="display: flex; flex-direction: row">
       <div
+        class="list"
         v-for="(list, listIndex) in lists"
         :key="list.name + listIndex"
       >
-        <div class="list" v-if="list.tasks.length > 0">
-          <p class="list-title">{{ list.name }}</p>
-          <div v-for="(task, cardIndex) in list.tasks" :key="cardIndex">
-            <task-card
-              @remove-card="RemoveCard(cardIndex, listIndex)"
-              :name="task.name"
-              :date="task.date"
-              :details="task.details"
-              :id="task.id"
-            />
-          </div>
+        <p class="list-title">{{ list.name }}</p>
+        <div v-for="(task, cardIndex) in list.tasks" :key="cardIndex">
+          <task-card
+            @remove-card="RemoveCard(cardIndex, listIndex)"
+            :name="task.name"
+            :date="task.date"
+            :details="task.details"
+            :id="task.id"
+          />
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { reactive, ref } from "vue";
-import Modal from "./Modal.vue";
-import TaskCard from "./TaskCard";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { uuid } from "vue-uuid";
 
-export default {
+<script>
+import Vue from "vue";
+import { reactive, ref } from "vue";
+import { uuid } from "vue-uuid";
+import { useStore } from "vuex";
+import { key } from "./store";
+
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import TaskCard from "./TaskCard";
+import Modal from "./Modal.vue";
+
+export default Vue.extend({
   components: { Modal, TaskCard },
   name: "HelloWorld",
   props: {
@@ -79,6 +86,7 @@ export default {
     };
   },
   setup() {
+    const store = useStore(key);
     let taskName = ref("");
     let taskDate = ref("");
     let taskDetail = ref("");
@@ -110,7 +118,6 @@ export default {
         name: "e",
       },
     ]);
-
     // eslint-disable-next-line
     let lists = reactive([
       {
@@ -123,6 +130,25 @@ export default {
       },
     ]);
     let modalVisability = ref(false);
+
+    function LogState() {
+      console.log(store.state.lists);
+    }
+
+    function AddRandomTask() {
+
+
+      console.log("Random Task Adding...");
+      store.commit("AddTask", {
+        listID: "default",
+        task: {
+          id: uuid.v1(),
+          title: "New Task" + ((Math.random() * 10) % 10),
+          dueDate: new Date().toLocaleDateString(),
+          details: "Nothing to see here.",
+        },
+      });
+    }
 
     function testerFunc(evt) {
       console.log("Captured", evt);
@@ -166,9 +192,11 @@ export default {
       testerFunc,
       RemoveCard,
       lists,
+      LogState,
+      AddRandomTask,
     };
   },
-};
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -177,11 +205,13 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: #34a;
-  min-width: 250px;
-  max-width: 300px;
+  min-width: 300px;
+  max-width: 350px;
   padding: 8px 20px 20px 20px;
   margin: 0px 15px;
   border-radius: 15px;
+  max-height: 70vh;
+  overflow: auto;
 }
 
 .list-title {

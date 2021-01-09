@@ -100,5 +100,6 @@ button {
   padding: 15px 18px;
   border-radius: 0.5em;
   color: white;
+  cursor: pointer;
 }
 </style>

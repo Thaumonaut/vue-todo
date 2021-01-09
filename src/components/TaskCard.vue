@@ -2,7 +2,10 @@
   <div class="card">
     <button class="delete-button" @click="RemoveCard($event)">X</button>
     <h4 class="name">{{ name }}</h4>
-    <p class="date">Due: {{ new Date(date).toLocaleDateString() }}</p>
+    <p v-if="date" class="date">
+      Due: {{ new Date(date).toLocaleDateString() }}
+    </p>
+    <p v-else class="date">No Due Date</p>
     <div class="details" v-html="details"></div>
   </div>
 </template>
